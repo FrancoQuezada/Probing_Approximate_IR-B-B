@@ -71,10 +71,10 @@ The script runs a small representative instance using `wht=30`. A commented exam
 
 ## Command-line interface
 
-The executable expects exactly 16 user arguments:
+The executable expects exactly 14 user arguments:
 
 ```text
-bin/main seed N_sc N_pb N_tp N_it N_pn beta lost al alphaScale wht FixMode DynamicFix viMode vfMode evalMode
+bin/main seed N_sc N_pb N_tp N_it N_pn beta lost al alphaScale wht FixMode DynamicFix evalMode
 ```
 
 ### Instance parameters
@@ -99,8 +99,6 @@ bin/main seed N_sc N_pb N_tp N_it N_pn beta lost al alphaScale wht FixMode Dynam
 | `wht` | Algorithm selector: `24` or `30` |
 | `FixMode` | Probing-variable fixing mode |
 | `DynamicFix` | Dynamic fixing switch |
-| `viMode` | Valid-inequality mode |
-| `vfMode` | Value-function inequality mode |
 | `evalMode` | Evaluation mode |
 
 Supported values for `wht` are:
@@ -127,24 +125,6 @@ Supported values for `wht` are:
 1 = on
 ```
 
-### `viMode`
-
-```text
-0 = off
-1 = path inequalities
-2 = tree inequalities
-3 = both
-```
-
-### `vfMode`
-
-```text
-0 = off
-1 = master
-2 = subproblem
-3 = both
-```
-
 ### `evalMode`
 
 ```text
@@ -169,7 +149,6 @@ mu_D = 100.0
 CorrMode = 1
 internal branch mode = 0
 internal cache flag = 1
-viRoutineMode = 0
 DebugTargetMask = -1
 TauPackingLBMode = 0
 ```
@@ -208,8 +187,8 @@ ApproxExactFallbackMode = 1
 The algorithms write results to text files in the repository root:
 
 ```text
-Results_MaBranchBound.txt   # output for wht=24
-Results_AIRBranchBound.txt  # output for wht=30
+Results_BB_New.txt  # output for wht=24
+Results_BB_AIR.txt  # output for wht=30
 ```
 
 These files are generated at runtime and should not be committed to the repository.
@@ -219,7 +198,7 @@ These files are generated at runtime and should not be committed to the reposito
 To reproduce a run, record the full command-line call, including the random seed and all instance parameters. For example:
 
 ```bash
-bin/main 1 5 5 12 10 10 1.0 30 0.5 0.5 30 1 0 0 0 1
+bin/main 1 5 5 12 10 10 1.0 30 0.5 0.5 30 1 0 1
 ```
 
 This command runs a small instance with the AIR-B&B algorithm (`wht=30`) using static fixing and item-wise evaluation.

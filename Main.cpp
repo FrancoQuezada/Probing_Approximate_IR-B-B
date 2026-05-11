@@ -12,11 +12,11 @@ int main(int argc, char * argv[]){
 
         IloEnv env;
 
-        if (argc != 17) {
+        if (argc != 15) {
             cout << "Usage:" << endl;
             cout << "  " << argv[0]
                  << " seed N_sc N_pb N_tp N_it N_pn beta lost al alphaScale wht"
-                 << " FixMode DynamicFix viMode vfMode evalMode" << endl;
+                 << " FixMode DynamicFix evalMode" << endl;
             cout << "Supported wht:" << endl;
             cout << "  24 30" << endl;
             return 1;
@@ -59,10 +59,7 @@ int main(int argc, char * argv[]){
         CorrMode = 1;     // W_it_pn mode when N_it==N_pn (0=single-component, 1=multi-component)
         int bbMode = 0;   // 0=single-element, 1=multi-element
         int bbCache = 1;  // 0=disable caching, 1=enable caching (hashing)
-        int viMode = 0;   // 0=off, 1=path, 2=tree, 3=both
-        int vfMode = 0;   // 0=off, 1=master, 2=subproblem, 3=both
         int evalMode = 0; // 0=joint, 1=item-wise
-        int viRoutineMode = 0; // 0=callback, 1=independent
         FixMode = 0; // 0=none, 1=static props3-5, 2=node-residual props3-5 (wht24), 3=static+node-residual
         DynamicFix = 0; // 0=off, 1=on (dynamic fixing in Ma-style branch-and-bound)
         HeurFreeWindow = 1; //time window for heuristics (for wht 24)
@@ -91,8 +88,6 @@ int main(int argc, char * argv[]){
 
         FixMode = std::atoi(argv[arg++]);
         DynamicFix = std::atoi(argv[arg++]);
-        viMode = std::atoi(argv[arg++]);
-        vfMode = std::atoi(argv[arg++]);
         evalMode = std::atoi(argv[arg++]);
 
         if (FixMode < 0 || FixMode > 3) {
@@ -101,14 +96,6 @@ int main(int argc, char * argv[]){
         }
         if (DynamicFix < 0 || DynamicFix > 1) {
             cout << "ERROR: DynamicFix must be in [0,1]." << endl;
-            return 1;
-        }
-        if (viMode < 0 || viMode > 3) {
-            cout << "ERROR: viMode must be in [0,3]." << endl;
-            return 1;
-        }
-        if (vfMode < 0 || vfMode > 3) {
-            cout << "ERROR: vfMode must be in [0,3]." << endl;
             return 1;
         }
         if (evalMode < 0 || evalMode > 1) {
@@ -122,10 +109,10 @@ int main(int argc, char * argv[]){
         bool rhoPnProvided = false;
         RhoPn.assign(N_pn, rho);
 
-        VI_pro1 = (viMode == 1 || viMode == 3) ? 1 : 0;
-        VI_pro2 = (viMode == 2 || viMode == 3) ? 1 : 0;
-        VI_pro3 = vfMode;
-        VI_routine = viRoutineMode;
+        VI_pro1 = 0;
+        VI_pro2 = 0;
+        VI_pro3 = 0;
+        VI_routine = 0;
         cout <<"######## Parameters ########"<< endl; 
         cout << "Seed: " << seed << endl;
         cout << "Number of time periods: " << N_tp << endl;
@@ -143,8 +130,6 @@ int main(int argc, char * argv[]){
         cout << "Model to solve (wht): " << wht << endl;
         cout << "FixMode (props): " << FixMode << endl;
         cout << "DynamicFix (B&B Ma): " << DynamicFix << endl;
-        cout << "Valid inequalities mode (0=off,1=path,2=tree,3=both): " << viMode << endl;
-        cout << "Value function inequalities (0=off,1=master,2=subproblem,3=both): " << vfMode << endl;
         cout << "EvalMode (0=joint,1=item): " << evalMode << endl;
         if (wht == 24) {
             cout << "Heuristic free window (Y): " << HeurFreeWindow << endl;
@@ -321,7 +306,7 @@ int main(int argc, char * argv[]){
             if (writeHeader) {
                 fileRESULTS
                     << "seed\tN_tp\tN_sc\tN_pb\tN_it\tN_pn\tbeta\tmu_D\tlost\trho\twht\t"
-                    << "al\talphaScale\tFixMode\tDynamicFix\tviMode\tviRoutineMode\tvfMode\tevalMode\t"
+                    << "al\talphaScale\tFixMode\tDynamicFix\tevalMode\t"
                     << "HeurFreeWindow\tHeurLBMode\tHeurRepairMode\tHeurRepairV3UpdateMode\tHeurRepairV3MaxIter\t"
                     << "HeurIntensifyTiLim\tWht24TimeLimitSec\tTauPackingLBMode\t"
                     << "ApproxGapEps\tApproxReuseMode\tApproxLocalImproveMode\tApproxLBMode\t"
@@ -348,9 +333,6 @@ int main(int argc, char * argv[]){
                 << alphaScale << "\t"
                 << FixMode << "\t"
                 << DynamicFix << "\t"
-                << viMode << "\t"
-                << viRoutineMode << "\t"
-                << vfMode << "\t"
                 << evalMode << "\t"
                 << HeurFreeWindow << "\t"
                 << HeurLBMode << "\t"
@@ -395,7 +377,7 @@ int main(int argc, char * argv[]){
             if (writeHeader) {
                 fileRESULTS
                     << "seed\tN_tp\tN_sc\tN_pb\tN_it\tN_pn\tbeta\tmu_D\tlost\trho\twht\t"
-                    << "al\talphaScale\tFixMode\tDynamicFix\tviMode\tviRoutineMode\tvfMode\tevalMode\t"
+                    << "al\talphaScale\tFixMode\tDynamicFix\tevalMode\t"
                     << "HeurFreeWindow\tHeurLBMode\tHeurRepairMode\tHeurRepairV3UpdateMode\tHeurRepairV3MaxIter\t"
                     << "HeurIntensifyTiLim\tWht24TimeLimitSec\tTauPackingLBMode\t"
                     << "bestLB\tbestUB\tTime\tNodes\tCuts\tFixCount\tDynFix\tPruned\tCacheMaskHit\tCacheTauHit\tBestZCount"
@@ -417,9 +399,6 @@ int main(int argc, char * argv[]){
                 << alphaScale << "\t"
                 << FixMode << "\t"
                 << DynamicFix << "\t"
-                << viMode << "\t"
-                << viRoutineMode << "\t"
-                << vfMode << "\t"
                 << evalMode << "\t"
                 << HeurFreeWindow << "\t"
                 << HeurLBMode << "\t"

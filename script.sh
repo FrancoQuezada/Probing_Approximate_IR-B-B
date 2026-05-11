@@ -11,16 +11,16 @@ if [[ ! -x "$MAIN_BIN" ]]; then
 fi
 
 # Argument order:
-# seed N_sc N_pb N_tp N_it N_pn beta lost al alphaScale wht FixMode DynamicFix viMode vfMode evalMode
+# seed N_sc N_pb N_tp N_it N_pn beta lost al alphaScale wht FixMode DynamicFix evalMode
 
 # Small AIR-B&B example (wht=30). ApproxGapEps is fixed internally in Main.cpp.
 "$MAIN_BIN" \
   1 5 5 6 2 2 \
   1.0 30 0.5 0.5 \
-  30 1 0 0 0 1
+  30 1 0 1
 
 # Optional Ma-style enhanced branch-and-bound example (wht=24):
 # "$MAIN_BIN" \
 #   1 5 5 6 2 2 \
 #   1.0 30 0.5 0.5 \
-#   24 1 0 0 0 0
+#   24 1 0 0
