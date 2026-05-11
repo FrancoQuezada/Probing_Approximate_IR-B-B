@@ -1,109 +1,229 @@
-# Probing Approximate Information-Relaxation Branch-and-Bound
+# Approximate Information-Relaxation Branch-and-Bound
 
-This repository contains a cleaned C++/CPLEX implementation for two execution modes only:
+This repository contains the C++/CPLEX implementation used in the computational experiments of the manuscript on stochastic production planning with probing decisions.
 
-- `wht=24`: Ma-style enhanced branch-and-bound.
-- `wht=30`: approximate information-relaxation branch-and-bound (AIR-B&B).
+The code implements two branch-and-bound algorithms:
 
-Removed legacy variants are not supported in this repository.
+- `wht=24`: the baseline Ma-style enhanced branch-and-bound algorithm.
+- `wht=30`: the proposed approximate information-relaxation branch-and-bound algorithm, AIR-B&B.
+
+The executable is:
+
+```bash
+bin/main
+```
+
+## Repository contents
+
+The repository includes the source files required to compile and run the computational experiments, the `Makefile`, and a minimal example script:
+
+```text
+Makefile
+*.cpp
+*.h / *.hpp
+script.sh
+README.md
+```
+
+Generated binaries, object files, logs, and result files are not tracked by Git.
 
 ## Requirements
 
-- C++ compiler with C++11 support
-- Make
-- IBM ILOG CPLEX / Concert
+The code requires:
 
-The default `Makefile` expects CPLEX Studio under:
+- a C++ compiler
+- `make`
+- IBM ILOG CPLEX
 
-```text
-/opt/ibm/ILOG/CPLEX_Studio2211
-```
-
-If your installation is elsewhere, update the CPLEX and Concert paths in `Makefile`.
+The `Makefile` should be adjusted if the local CPLEX installation path differs from the one configured in the repository.
 
 ## Build
+
+From the repository root, run:
+
+```bash
+make clean
+make
+```
+
+If `make clean` is not available in your environment, run:
 
 ```bash
 make
 ```
 
-To clean object/dependency files:
+The build produces the executable:
 
 ```bash
-make clean
-```
-
-The executable is created at:
-
-```text
 bin/main
 ```
 
-## Minimal Example
+## Minimal example
+
+The repository provides one example script:
 
 ```bash
 chmod +x script.sh
 ./script.sh
 ```
 
-`script.sh` runs one small `wht=30` AIR-B&B example. It does not launch a grid experiment. A commented `wht=24` example is included in the script.
+The script runs a small representative instance using `wht=30`. A commented example for `wht=24` may also be included in the script.
 
-## Command Line Interface
+## Command-line interface
 
-`bin/main` expects exactly 16 user arguments:
+The executable expects exactly 16 user arguments:
 
 ```text
 bin/main seed N_sc N_pb N_tp N_it N_pn beta lost al alphaScale wht FixMode DynamicFix viMode vfMode evalMode
 ```
 
-Supported values for `wht`:
+### Instance parameters
+
+| Argument | Description |
+|---|---|
+| `seed` | Random seed used for instance generation |
+| `N_sc` | Number of demand scenarios |
+| `N_pb` | Number of probing scenarios |
+| `N_tp` | Number of time periods |
+| `N_it` | Number of items |
+| `N_pn` | Number of probing components |
+| `beta` | Capacity level |
+| `lost` | Lost-sales penalty |
+| `al` | Probing-cost scaling factor |
+| `alphaScale` | Multiplier applied to probing costs |
+
+### Algorithm and feature parameters
+
+| Argument | Description |
+|---|---|
+| `wht` | Algorithm selector: `24` or `30` |
+| `FixMode` | Probing-variable fixing mode |
+| `DynamicFix` | Dynamic fixing switch |
+| `viMode` | Valid-inequality mode |
+| `vfMode` | Value-function inequality mode |
+| `evalMode` | Evaluation mode |
+
+Supported values for `wht` are:
 
 ```text
 24 30
 ```
 
-Legacy `wht` values such as `11/12/13/25/27/28/29/60` are not supported.
+## Main feature flags
 
-## Main Arguments
+### `FixMode`
 
-- `seed`: random seed.
-- `N_sc`: number of demand scenarios.
-- `N_pb`: number of probing scenarios.
-- `N_tp`: number of time periods.
-- `N_it`: number of items.
-- `N_pn`: number of probing components.
-- `beta`: capacity level.
-- `lost`: lost-sales penalty.
-- `al`: probing-cost scaling parameter.
-- `alphaScale`: multiplier for probing costs.
-- `wht`: algorithm selector, either `24` or `30`.
-- `FixMode`: fixing mode, valid range `[0,3]`.
-- `DynamicFix`: dynamic fixing flag, valid range `[0,1]`.
-- `viMode`: valid inequality mode, valid range `[0,3]`.
-- `vfMode`: value-function mode, valid range `[0,3]`.
-- `evalMode`: evaluation mode, valid range `[0,1]`. For `wht=30`, `evalMode=1` is recommended.
+```text
+0 = off
+1 = static fixing
+2 = node residual fixing
+3 = static + node residual fixing
+```
 
-## Algorithm Modes
+### `DynamicFix`
 
-`wht=24` runs the Ma-style enhanced branch-and-bound route.
+```text
+0 = off
+1 = on
+```
 
-`wht=30` runs AIR-B&B, the approximate information-relaxation branch-and-bound route.
+### `viMode`
 
-## AIR Gap Tolerance
+```text
+0 = off
+1 = path inequalities
+2 = tree inequalities
+3 = both
+```
 
-`ApproxGapEps` is fixed internally in `Main.cpp`; it is not passed through the CLI or `script.sh`.
+### `vfMode`
 
-Current fixed value:
+```text
+0 = off
+1 = master
+2 = subproblem
+3 = both
+```
+
+### `evalMode`
+
+```text
+0 = joint evaluation
+1 = item-wise evaluation
+```
+
+For `wht=30`, the intended setting is:
+
+```text
+evalMode = 1
+```
+
+## Internal defaults
+
+The command-line interface exposes only the parameters needed to reproduce the computational runs. The remaining algorithmic options are fixed internally.
+
+### Shared defaults
+
+```text
+mu_D = 100.0
+CorrMode = 1
+internal branch mode = 0
+internal cache flag = 1
+viRoutineMode = 0
+DebugTargetMask = -1
+TauPackingLBMode = 0
+```
+
+The per-component correlation vector is generated internally during instance generation.
+
+### Defaults for `wht=24`
+
+```text
+HeurFreeWindow = 1
+HeurLBMode = 1
+HeurRepairMode = 0
+HeurRepairV3UpdateMode = 0
+HeurRepairV3MaxIter = 20
+HeurIntensifyTiLim = 10.0
+Wht24TimeLimitSec = 3600.0
+```
+
+### Defaults for `wht=30`
 
 ```text
 ApproxGapEps = 0.05
+ApproxReuseMode = 1
+ApproxLocalImproveMode = 1
+ApproxLBMode = 1
+ApproxGlobalLagLBMode = 1
+ApproxGlobalLagMaxIter = 1
+ApproxGlobalLagStep0 = 1.0
+ApproxExactFallbackMode = 1
 ```
 
-## Output Files
+`ApproxGapEps` is fixed internally at `0.05`. The example script does not pass it as a command-line argument.
 
-The executable writes result rows to:
+## Output files
 
-- `Results_BB_New.txt` for `wht=24`.
-- `Results_BB_AIR.txt` for `wht=30`.
+The algorithms write results to text files in the repository root:
 
-Result files are generated at runtime and are ignored by Git.
+```text
+Results_MaBranchBound.txt   # output for wht=24
+Results_AIRBranchBound.txt  # output for wht=30
+```
+
+These files are generated at runtime and should not be committed to the repository.
+
+## Reproducibility notes
+
+To reproduce a run, record the full command-line call, including the random seed and all instance parameters. For example:
+
+```bash
+bin/main 1 5 5 12 10 10 1.0 30 0.5 0.5 30 1 0 0 0 1
+```
+
+This command runs a small instance with the AIR-B&B algorithm (`wht=30`) using static fixing and item-wise evaluation.
+
+## Code availability
+
+This repository is intended to accompany the manuscript and provide the implementation used for the reported computational experiments.
