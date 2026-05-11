@@ -1,0 +1,13 @@
+bin/
+obj/
+build/
+*.o
+*.obj
+*.out
+*.exe
+*.log
+*.d
+Results_*.txt
+.DS_Store
+.vscode/
+.idea/
