@@ -155,6 +155,21 @@ TauPackingLBMode = 0
 
 The per-component correlation vector is generated internally during instance generation.
 
+### Correlation-mode default
+
+`CorrMode` controls how the item-to-probing-component weight matrix `W_it_pn` is generated only when the number of items equals the number of probing components (`N_it == N_pn`):
+
+```text
+CorrMode = 0: single-component mode
+  Each item is linked to one probing component, using item index modulo N_pn.
+
+CorrMode = 1: multi-component mode
+  Each item is linked to a random subset of probing components.
+  The selected weights are normalized if their squared sum exceeds 1.
+```
+
+In this repository version, `CorrMode` is fixed internally at `1`, so equal-size item/component instances use the multi-component correlation structure. When `N_it > N_pn`, the generator uses the single-component modulo assignment. When `N_it < N_pn`, it uses the random multi-component subset assignment.
+
 ### Defaults for `wht=24`
 
 ```text
